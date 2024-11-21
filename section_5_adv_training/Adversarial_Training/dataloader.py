@@ -39,7 +39,7 @@ def read_examples_from_csv(csv_path, label_map, ignore_header=False):
 
 def get_examples_and_labels(dataset):
     if dataset == 'yelp':
-        data_dir = '/net/bigtemp/jg6yd/treeattack/textdata/yelp_review_polarity_csv/'
+        data_dir = 'yelp_review_polarity_csv/'
         label_map = {
             '1': 0, # negative
             '2': 1  # positive

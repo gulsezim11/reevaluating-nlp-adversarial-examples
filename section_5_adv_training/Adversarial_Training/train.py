@@ -7,7 +7,6 @@ import random
 import time
 import torch
 import tqdm
-import wandb
 
 from dataloader import get_examples_and_labels
 from multiprocessing import Pool, cpu_count
@@ -19,7 +18,6 @@ from transformers.optimization import AdamW, get_linear_schedule_with_warmup
 
 from textattack.augmentation import EmbeddingAugmenter
 
-wandb.init(project='augmentation2', sync_tensorboard=True)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('root')
@@ -117,10 +115,10 @@ def parse_args():
     if args.output_prefix: args.output_prefix += '-'
     
     cased_str = '-' + ('cased' if args.cased else 'uncased')
-    date_now = datetime.datetime.now().strftime("%Y-%m-%d-%H:%M")
+    date_now = datetime.datetime.now().strftime("%Y-%m-%d")
     root_output_dir = 'outputs'
     args.output_dir = os.path.join(root_output_dir, 
-        f'{args.output_prefix}{args.dataset}{cased_str}-{date_now}/')
+        f'{args.output_prefix}{args.dataset}{cased_str}-{date_now}')
     
     # Use multiple GPUs if we can!
     args.num_gpus = torch.cuda.device_count()
@@ -152,7 +150,7 @@ def main():
     # Get list of text and list of label (integers) from disk.
     train_text, train_label_id_list, eval_text, eval_label_id_list = \
         get_examples_and_labels(args.dataset)
-    
+    print("It is finished!")
     # Augment training data.
     if (args.augmentation_recipe is not None) and len(args.augmentation_recipe):
         import pandas as pd
@@ -216,10 +214,10 @@ def main():
     
     print_cuda_memory(args)
      # old INFO:__main__:Loaded data and tokenized in 189.66675066947937s
-    
+
         # @TODO support other vocabularies, or at least, support case
     tokenizer = BertWordPieceTokenizer('bert-base-uncased-vocab.txt', lowercase=True)
-    tokenizer.enable_padding(max_length=args.max_seq_len)
+    tokenizer.enable_padding(pad_to_multiple_of=args.max_seq_len)
     tokenizer.enable_truncation(max_length=args.max_seq_len)
     
     logger.info(f'Tokenizing training data. (len: {train_examples_len})')
@@ -272,8 +270,7 @@ def main():
     logger.info("  Max sequence length = %d", args.max_seq_len)
     logger.info("  Num steps = %d", num_train_optimization_steps)
     
-    wandb.log({'train_examples_len': train_examples_len})
-    
+
     train_input_ids = torch.tensor(train_text_ids, dtype=torch.long)
     train_label_ids = torch.tensor(train_label_id_list, dtype=torch.long)
     train_data = TensorDataset(train_input_ids, train_label_ids)
@@ -371,8 +368,7 @@ def main():
         # Check accuracy after each epoch.
         eval_acc = get_eval_acc()
         tb_writer.add_scalar('epoch_eval_acc', eval_acc, global_step)
-        wandb.log({'epoch_eval_acc': eval_acc, 'epoch': epoch})
-        
+
         if args.checkpoint_every_epoch:
             save_model_checkpoint(f'epoch-{epoch}')
                     
