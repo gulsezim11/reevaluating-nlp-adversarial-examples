@@ -42,6 +42,14 @@ textattack attack --model lstm-ag-news --attack-from-file section_6_adjusted_att
 ```
 
 These attacks have been tested using TextAttack v0.2.10.
+
+## Contributions from Mahmudov Fuad and Duisen Gulsezim
+- `section_5_tfadjusted/` did not contain evaluation of grammaticality and semantics in TFAdjusted.
+	- `tfadjusted_grammaticality_analysis.ipynb` contains the effectiveness of perturbations in terms of grammaticality. It takes Computer-altered text (using TFAdjusted) from tfadjusted_non_suspicion_results.csv and checks the grammar using language_tool_python.
+	- `tfadjusted_semantic_analysis.ipynb` contains the evaluation of semantic using cosine similarity.
+  
+
+
 ### Appendix
 - `appx_1.2_finding_thresholds` contain the results from the 'threshold-finding' experiments from the paper.
 	- `syn_thresh` contains the synonyms used in the survey to find the threshold for word embedding cosine similarity in the counter-fitted embedding space. Human responses indicated that $0.9$ was the optimal threshold for counter-fitted embedding word cosine similarity.

@@ -1,24 +1,26 @@
-from textattack.shared.attack import Attack
+from textattack.attack import Attack
 from textattack.constraints.semantics import WordEmbeddingDistance
 from textattack.constraints.pre_transformation import RepeatModification, StopwordModification
-from textattack.constraints.semantics.sentence_encoders import UniversalSentenceEncoder, BERT
+from textattack.constraints.semantics.sentence_encoders.sentence_bert import SBERT
+from textattack.constraints.semantics.sentence_encoders import UniversalSentenceEncoder
 from textattack.constraints.grammaticality import PartOfSpeech, LanguageTool
 from textattack.goal_functions import UntargetedClassification
 from textattack.search_methods import GreedyWordSwapWIR
 from textattack.transformations import WordSwapEmbedding
 
+
 def TextFoolerJin2019Adjusted(model, SE_thresh=0.98, sentence_encoder='bert'):
     """
-        Jin, D., Jin, Z., Zhou, J.T., & Szolovits, P. (2019). 
-        
-        Is BERT Really Robust? Natural Language Attack on Text Classification and Entailment. 
-        
-        https://arxiv.org/abs/1907.11932 
-       
+        Jin, D., Jin, Z., Zhou, J.T., & Szolovits, P. (2019).
+
+        Is BERT Really Robust? Natural Language Attack on Text Classification and Entailment.
+
+        https://arxiv.org/abs/1907.11932
+
         Constraints adjusted from paper to align with human evaluation.
     """
     #
-    # Swap words with their embedding nearest-neighbors. 
+    # Swap words with their embedding nearest-neighbors.
     #
     # Embedding: Counter-fitted PARAGRAM-SL999 vectors.
     #
@@ -44,13 +46,13 @@ def TextFoolerJin2019Adjusted(model, SE_thresh=0.98, sentence_encoder='bert'):
     # Universal Sentence Encoder with a minimum angular similarity of ε = 0.7.
     #
     if sentence_encoder == 'bert':
-        se_constraint = BERT(threshold=SE_thresh,
-            metric='cosine', compare_against_original=False, window_size=15,
-            skip_text_shorter_than_window=False)
+        se_constraint = SBERT(threshold=SE_thresh,
+                              metric='cosine', compare_against_original=False, window_size=15,
+                              skip_text_shorter_than_window=False)
     else:
         se_constraint = UniversalSentenceEncoder(threshold=SE_thresh,
-            metric='cosine', compare_against_original=False, window_size=15,
-            skip_text_shorter_than_window=False)
+                                                 metric='cosine', compare_against_original=False, window_size=15,
+                                                 skip_text_shorter_than_window=False)
     constraints.append(se_constraint)
     #
     # Do grammar checking
@@ -58,9 +60,9 @@ def TextFoolerJin2019Adjusted(model, SE_thresh=0.98, sentence_encoder='bert'):
     constraints.append(
         LanguageTool(0)
     )
-    
+
     #
-    # Untargeted attack   
+    # Untargeted attack
     #
     goal_function = UntargetedClassification(model)
 
@@ -68,7 +70,8 @@ def TextFoolerJin2019Adjusted(model, SE_thresh=0.98, sentence_encoder='bert'):
     # Greedily swap words with "Word Importance Ranking".
     #
     search_method = GreedyWordSwapWIR()
-    
+
     return Attack(goal_function, constraints, transformation, search_method)
+
 
 attack = TextFoolerJin2019Adjusted

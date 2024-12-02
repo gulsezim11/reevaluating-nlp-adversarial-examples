@@ -1,25 +1,27 @@
-from textattack.shared.attack import Attack
+from textattack.attack import Attack
 from textattack.constraints.grammaticality import PartOfSpeech, LanguageTool
 from textattack.constraints.semantics import WordEmbeddingDistance
 from textattack.constraints.pre_transformation import RepeatModification, StopwordModification
-from textattack.constraints.semantics.sentence_encoders import UniversalSentenceEncoder, BERT
+from textattack.constraints.semantics.sentence_encoders.sentence_bert import SBERT
+from textattack.constraints.semantics.sentence_encoders import UniversalSentenceEncoder
 from textattack.goal_functions import UntargetedClassification
 from textattack.search_methods import AlzantotGeneticAlgorithm
 from textattack.transformations import WordSwapEmbedding
 
+
 def Alzantot2018Adjusted(model, SE_thresh=0.98, sentence_encoder='bert'):
     """
-        Alzantot, M., Sharma, Y., Elgohary, A., Ho, B., Srivastava, M.B., & Chang, 
-        K. (2018). 
-        
+        Alzantot, M., Sharma, Y., Elgohary, A., Ho, B., Srivastava, M.B., & Chang,
+        K. (2018).
+
         Generating Natural Language Adversarial Examples.
-        
-        https://arxiv.org/abs/1801.00554 
+
+        https://arxiv.org/abs/1801.00554
 
         Constraints adjusted from paper to align with human evaluation.
     """
     #
-    # Swap words with their embedding nearest-neighbors. 
+    # Swap words with their embedding nearest-neighbors.
     #
     # Embedding: Counter-fitted PARAGRAM-SL999 vectors.
     #
@@ -38,25 +40,25 @@ def Alzantot2018Adjusted(model, SE_thresh=0.98, sentence_encoder='bert'):
     #
     constraints = []
     constraints.append(
-            WordEmbeddingDistance(min_cos_sim=0.9)
+        WordEmbeddingDistance(min_cos_sim=0.9)
     )
     #
     # Universal Sentence Encoder with a minimum angular similarity of ε = 0.7.
     #
     if sentence_encoder == 'bert':
-        se_constraint = BERT(threshold=SE_thresh,
-            metric='cosine', compare_against_original=False, window_size=15,
-            skip_text_shorter_than_window=False)
+        se_constraint = SBERT(threshold=SE_thresh,
+                              metric='cosine', compare_against_original=False, window_size=15,
+                              skip_text_shorter_than_window=False)
     else:
         se_constraint = UniversalSentenceEncoder(threshold=SE_thresh,
-            metric='cosine', compare_against_original=False, window_size=15,
-            skip_text_shorter_than_window=False)
+                                                 metric='cosine', compare_against_original=False, window_size=15,
+                                                 skip_text_shorter_than_window=False)
     constraints.append(se_constraint)
     #
     # Do grammar checking
     #
     constraints.append(
-            LanguageTool(0)
+        LanguageTool(0)
     )
     #
     # Goal is untargeted classification
@@ -68,5 +70,6 @@ def Alzantot2018Adjusted(model, SE_thresh=0.98, sentence_encoder='bert'):
     search_method = AlzantotGeneticAlgorithm(pop_size=60, max_iters=20, post_crossover_check=False)
 
     return Attack(goal_function, constraints, transformation, search_method)
+
 
 attack = Alzantot2018Adjusted
