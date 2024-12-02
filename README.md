@@ -1,6 +1,13 @@
 # Reevaluating Adversarial Examples in Natural Language
 
 This repository contains code and datasets for the experiments in "Reevaluating Adversarial Examples in Natural Language."
+## Contributions from Mahmudov Fuad and Duisen Gulsezim
+- `section_5_tfadjusted/` did not contain evaluation of grammaticality and semantics in TFAdjusted.
+	- `tfadjusted_grammaticality_analysis.ipynb` contains the effectiveness of perturbations in terms of grammaticality. It takes Computer-altered text (using TFAdjusted) from tfadjusted_non_suspicion_results.csv and checks the grammar using language_tool_python.
+	- `tfadjusted_semantic_analysis.ipynb` contains the evaluation of semantic using cosine similarity.
+- `section_5_adv_training/Adversarial_Training/train.py` improved visualization.
+- `section_5_adv_training/Adversarial_Training/train2.py` improved Training model with cosine annealing schedule and WeightedRandomSampler for better accuracy.
+
 
 ## Files
 
@@ -43,11 +50,7 @@ textattack attack --model lstm-ag-news --attack-from-file section_6_adjusted_att
 
 These attacks have been tested using TextAttack v0.2.10.
 
-## Contributions from Mahmudov Fuad and Duisen Gulsezim
-- `section_5_tfadjusted/` did not contain evaluation of grammaticality and semantics in TFAdjusted.
-	- `tfadjusted_grammaticality_analysis.ipynb` contains the effectiveness of perturbations in terms of grammaticality. It takes Computer-altered text (using TFAdjusted) from tfadjusted_non_suspicion_results.csv and checks the grammar using language_tool_python.
-	- `tfadjusted_semantic_analysis.ipynb` contains the evaluation of semantic using cosine similarity.
-  
+
 
 
 ### Appendix
